@@ -16,14 +16,17 @@ def send_telegram_message(token, chat_id, message):
         "reply_markup": '{"inline_keyboard":[[{"text":"问题反馈❓","url":"https://t.me/amosgantian"}]]}'
     }
 
-    response = requests.post(telegram_url, json=telegram_payload)
-    logging.debug(f"Telegram 请求状态码：{response.status_code}")
-    logging.debug(f"Telegram 请求返回内容：{response.text}")
+    try:
+        response = requests.post(telegram_url, json=telegram_payload)
+        logging.debug(f"Telegram 请求状态码：{response.status_code}")
+        logging.debug(f"Telegram 请求返回内容：{response.text}")
 
-    if response.status_code != 200:
-        logging.error("发送 Telegram 消息失败")
-    else:
-        logging.info("发送 Telegram 消息成功")
+        if response.status_code != 200:
+            logging.error("发送 Telegram 消息失败")
+        else:
+            logging.info("发送 Telegram 消息成功")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"发送 Telegram 消息请求失败: {str(e)}")
 
 # 从环境变量中获取密钥
 accounts_json = os.getenv('ACCOUNTS_JSON')
@@ -31,10 +34,19 @@ telegram_token = os.getenv('TELEGRAM_TOKEN')
 telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
 
 # 验证环境变量是否存在
-if not accounts_json or not telegram_token or not telegram_chat_id:
-    error_message = "环境变量缺失: 请检查 ACCOUNTS_JSON, TELEGRAM_TOKEN 和 TELEGRAM_CHAT_ID"
+missing_vars = []
+if not accounts_json:
+    missing_vars.append('ACCOUNTS_JSON')
+if not telegram_token:
+    missing_vars.append('TELEGRAM_TOKEN')
+if not telegram_chat_id:
+    missing_vars.append('TELEGRAM_CHAT_ID')
+
+if missing_vars:
+    error_message = f"环境变量缺失: 请检查 {', '.join(missing_vars)}"
     logging.error(error_message)
-    send_telegram_message(telegram_token, telegram_chat_id, error_message)
+    if telegram_token and telegram_chat_id:
+        send_telegram_message(telegram_token, telegram_chat_id, error_message)
     exit(1)
 
 logging.info("环境变量已成功加载")
@@ -76,10 +88,10 @@ for server in servers:
         restore_command = f"sshpass -p '{password}' ssh -o StrictHostKeyChecking=no -p {port} {username}@{host} '{command}'"
         logging.debug(f"执行命令: {restore_command}")
         try:
-            output = subprocess.check_output(restore_command, shell=True, stderr=subprocess.STDOUT)
-            summary_message += f"\n成功恢复 {host} 上的 singbox 服务：\n{output.decode('utf-8')}"
+            output = subprocess.check_output(restore_command, shell=True, stderr=subprocess.STDOUT, text=True)
+            summary_message += f"\n成功恢复 {host} 上的 singbox 服务：\n{output}"
         except subprocess.CalledProcessError as e:
-            error_output = e.output.decode('utf-8')
+            error_output = e.output
             logging.error(f"执行命令失败: {restore_command}\n错误信息: {error_output}")
             summary_message += f"\n未能恢复 {host} 上的 singbox 服务：\n{error_output}"
         except Exception as e:
