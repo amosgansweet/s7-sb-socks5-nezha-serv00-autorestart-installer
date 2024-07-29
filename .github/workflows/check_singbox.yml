@@ -12,10 +12,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3 # 更新到 v3
+      uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v3 # 更新到 v3
+      uses: actions/setup-python@v3
       with:
         python-version: '3.x'
 
@@ -24,10 +24,16 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests
 
+    - name: Debug environment variables
+      run: |
+        echo "ACCOUNTS_JSON: ${{ secrets.ACCOUNTS_JSON }}"
+        echo "TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}"
+        echo "TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}"
+
     - name: Run recover_singbox.py
       env:
         ACCOUNTS_JSON: ${{ secrets.ACCOUNTS_JSON }}
         TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       run: |
-        python recover_singbox.py
+        python recover_singbox.py || { echo 'Python script failed'; exit 1; }
