@@ -25,7 +25,10 @@ jobs:
         pip install requests
 
     - name: Install sshpass
-      run: sudo apt-get install sshpass
+      run: sudo apt-get update && sudo apt-get install -y sshpass
+
+    - name: List files
+      run: ls -la
 
     - name: Debug environment variables
       run: |
