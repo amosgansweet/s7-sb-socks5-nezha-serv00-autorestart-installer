@@ -1,5 +1,7 @@
 # sing-box-installer
 
+serv7 has been installed it 
+
 https://github.com/RayWangQvQ/sing-box-installer
 
 基于`sing-box`和`docker`容器化搭建`vmess`、`naiveproxy`和`hysteria2`的保姆级教程。
