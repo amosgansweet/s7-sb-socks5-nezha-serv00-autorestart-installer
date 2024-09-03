@@ -1,5 +1,5 @@
 
-name: 恢复singbox服务并发送Telegram消息
+name: 恢复singbox-hy2-nezha服务并发送Telegram消息
 
 on:
   schedule:
