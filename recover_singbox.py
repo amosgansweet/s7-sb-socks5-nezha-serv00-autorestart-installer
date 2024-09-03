@@ -1,4 +1,3 @@
-
 import os
 import json
 import subprocess
@@ -9,7 +8,11 @@ def send_telegram_message(token, chat_id, message):
     telegram_payload = {
         "chat_id": chat_id,
         "text": message,
-        "reply_markup": '{"inline_keyboard":[[{"text":"问题反馈❓","url":"https://t.me/amosgantian"}]]}'
+        "reply_markup": json.dumps({
+            "inline_keyboard": [
+                [{"text": "问题反馈❓", "url": "https://t.me/amosgantian"}]
+            ]
+        })
     }
 
     response = requests.post(telegram_url, json=telegram_payload)
@@ -27,6 +30,12 @@ telegram_token = os.getenv('TELEGRAM_TOKEN')
 telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
 
 # 检查并解析 JSON 字符串
+if not accounts_json:
+    error_message = "ACCOUNTS_JSON 环境变量未设置或为空"
+    print(error_message)
+    send_telegram_message(telegram_token, telegram_chat_id, error_message)
+    exit(1)
+
 try:
     servers = json.loads(accounts_json)
 except json.JSONDecodeError:
@@ -39,10 +48,14 @@ except json.JSONDecodeError:
 summary_message = "serv00-vless 恢复操作结果：\n"
 
 # 默认恢复命令
-default_restore_commands = ["ps aux | grep -v grep | grep sing-box > /dev/null || nohup $HOME/sing-box/sing-box run -c $HOME/sing-box/data/config.json > $HOME/sing-box/data/sing-box.log 2>&1 &",
-                           "ps aux | grep -v grep | grep server > /dev/null || nohup $HOME/hysteria/S7-Hysteria-install-serv00.sh >/dev/null  2>&1 &",
-                           "ps aux | grep -v grep | grep nezha-agent > /dev/null || nohup $HOME/nezha-agent/nezha-agent.sh >/dev/null  2>&1 &"
-                          ]
+default_restore_command = (
+    "ps aux | grep -v grep | grep sing-box > /dev/null || "
+    "nohup $HOME/sing-box/sing-box run -c $HOME/sing-box/data/config.json > $HOME/sing-box/data/sing-box.log 2>&1 &; "
+    "ps aux | grep -v grep | grep server > /dev/null || "
+    "nohup $HOME/hysteria/S7-Hysteria-install-serv00.sh >/dev/null  2>&1 &; "
+    "ps aux | grep -v grep | grep nezha-agent > /dev/null || "
+    "nohup $HOME/nezha-agent/nezha-agent.sh >/dev/null  2>&1 &"
+)
 
 # 遍历服务器列表并执行恢复操作
 for server in servers:
@@ -55,20 +68,15 @@ for server in servers:
     print(f"连接到 {host}...")
 
     # 执行恢复命令（这里假设使用 SSH 连接和密码认证）
-    for command in cron_commands:
-        restore_command = f"sshpass -p '{password}' ssh -o StrictHostKeyChecking=no -p {port} {username}@{host} '{command}'"
-        print(f"执行命令: {restore_command}")  # 添加日志
-        try:
-            output = subprocess.check_output(restore_command, shell=True, stderr=subprocess.STDOUT)
-            summary_message += f"\n成功恢复 {host} 上的 singbox and nezha 服务：\n{output.decode('utf-8')}"
-        except subprocess.CalledProcessError as e:
-            error_output = e.output.decode('utf-8')
-            print(f"执行命令失败: {restore_command}\n错误信息: {error_output}")  # 添加日志
-            summary_message += f"\n未能恢复 {host} 上的 singbox and nezha 服务：\n{error_output}"
-        except Exception as e:
-            error_message = str(e)
-            print(f"未知错误: {error_message}")  # 捕获其他异常
-            summary_message += f"\n未能恢复 {host} 上的 singbox and nezha 服务：\n{error_message}"
+    restore_command = (
+        f"sshpass -p '{password}' ssh -o StrictHostKeyChecking=no -p {port} "
+        f"{username}@{host} '{cron_command}'"
+    )
+    try:
+        output = subprocess.check_output(restore_command, shell=True, stderr=subprocess.STDOUT)
+        summary_message += f"\n成功恢复 {host} 上的服务：\n{output.decode('utf-8')}"
+    except subprocess.CalledProcessError as e:
+        summary_message += f"\n无法恢复 {host} 上的服务：\n{e.output.decode('utf-8')}"
 
 # 发送汇总消息到 Telegram
 send_telegram_message(telegram_token, telegram_chat_id, summary_message)
