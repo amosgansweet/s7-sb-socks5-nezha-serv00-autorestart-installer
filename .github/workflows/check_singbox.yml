@@ -3,7 +3,7 @@ name: 恢复singbox服务并发送Telegram消息
 
 on:
   schedule:
-    - cron: '0 0 */4 * *'  # 每4day执行一次
+    - cron: '0 4 */1 * *'  # 每4day执行一次
   workflow_dispatch:
 
 jobs:
