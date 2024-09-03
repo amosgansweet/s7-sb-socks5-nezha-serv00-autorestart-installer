@@ -4,6 +4,10 @@ import subprocess
 import requests
 
 def send_telegram_message(token, chat_id, message):
+    if not token or not chat_id:
+        print("Telegram token 或 chat_id 未设置")
+        return
+    
     telegram_url = f"https://api.telegram.org/bot{token}/sendMessage"
     telegram_payload = {
         "chat_id": chat_id,
@@ -15,14 +19,17 @@ def send_telegram_message(token, chat_id, message):
         })
     }
 
-    response = requests.post(telegram_url, json=telegram_payload)
-    print(f"Telegram 请求状态码：{response.status_code}")
-    print(f"Telegram 请求返回内容：{response.text}")
+    try:
+        response = requests.post(telegram_url, json=telegram_payload)
+        print(f"Telegram 请求状态码：{response.status_code}")
+        print(f"Telegram 请求返回内容：{response.text}")
 
-    if response.status_code != 200:
-        print("发送 Telegram 消息失败")
-    else:
-        print("发送 Telegram 消息成功")
+        if response.status_code != 200:
+            print("发送 Telegram 消息失败")
+        else:
+            print("发送 Telegram 消息成功")
+    except requests.exceptions.RequestException as e:
+        print(f"Telegram 消息发送失败，错误信息：{e}")
 
 # 从环境变量中获取密钥
 accounts_json = os.getenv('ACCOUNTS_JSON')
@@ -62,18 +69,20 @@ for server in servers:
     password = server['password']
     cron_command = server.get('cron', default_restore_command)
 
+    cron_command_str = " && ".join(cron_command) if isinstance(cron_command, list) else cron_command
+
     print(f"连接到 {host}...")
 
     # 执行恢复命令（这里假设使用 SSH 连接和密码认证）
     restore_command = (
         f"sshpass -p '{password}' ssh -o StrictHostKeyChecking=no -p {port} "
-        f"{username}@{host} '{cron_command}'"
+        f"{username}@{host} '{cron_command_str}'"
     )
     try:
         output = subprocess.check_output(restore_command, shell=True, stderr=subprocess.STDOUT)
-        summary_message += f"\n成功恢复 {host} 上的singbox and nezha服务：\n{output.decode('utf-8')}"
+        summary_message += f"\n成功恢复 {host} 上的 singbox 和 nezha 服务：\n{output.decode('utf-8')}"
     except subprocess.CalledProcessError as e:
-        summary_message += f"\n无法恢复 {host} 上的singbox and nezha服务：\n{e.output.decode('utf-8')}"
+        summary_message += f"\n无法恢复 {host} 上的 singbox 和 nezha 服务：\n{e.output.decode('utf-8')}"
 
 # 发送汇总消息到 Telegram
 send_telegram_message(telegram_token, telegram_chat_id, summary_message)
