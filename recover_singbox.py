@@ -71,9 +71,9 @@ for server in servers:
     )
     try:
         output = subprocess.check_output(restore_command, shell=True, stderr=subprocess.STDOUT)
-        summary_message += f"\n成功恢复 {host} 上的服务：\n{output.decode('utf-8')}"
+        summary_message += f"\n成功恢复 {host} 上的singbox and nezha服务：\n{output.decode('utf-8')}"
     except subprocess.CalledProcessError as e:
-        summary_message += f"\n无法恢复 {host} 上的服务：\n{e.output.decode('utf-8')}"
+        summary_message += f"\n无法恢复 {host} 上的singbox and nezha服务：\n{e.output.decode('utf-8')}"
 
 # 发送汇总消息到 Telegram
 send_telegram_message(telegram_token, telegram_chat_id, summary_message)
