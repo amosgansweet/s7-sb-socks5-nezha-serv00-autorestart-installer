@@ -80,7 +80,7 @@ for server in servers:
         restore_command = f"sshpass -p '{password}' ssh -o StrictHostKeyChecking=no -p {port} {username}@{host} '{command}'"
         print(f"执行命令: {restore_command}")  # 添加日志
         try:
-            output = subprocess.check_output(restore_command, shell=True, stderr=subprocess.STDOUT, timeout=60)
+            output = subprocess.check_output(restore_command, shell=True, stderr=subprocess.STDOUT)
             summary_message += f"\n成功恢复 {host} 上的 singbox和hy2和nezha 服务：\n{output.decode('utf-8')}"
         except subprocess.CalledProcessError as e:
             error_output = e.output.decode('utf-8')
