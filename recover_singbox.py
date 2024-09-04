@@ -67,22 +67,29 @@ for server in servers:
     port = server['port']
     username = server['username']
     password = server['password']
-    cron_command = server.get('cron', default_restore_command)
-
-    cron_command_str = " && ".join(cron_command) if isinstance(cron_command, list) else cron_command
+    cron_commands = server.get('cron', default_restore_command)
 
     print(f"连接到 {host}...")
 
+    # 如果 cron 命令是字符串，转换为列表
+    if isinstance(cron_commands, str):
+        cron_commands = [cron_commands]
+
     # 执行恢复命令（这里假设使用 SSH 连接和密码认证）
-    restore_command = (
-        f"sshpass -p '{password}' ssh -o StrictHostKeyChecking=no -p {port} "
-        f"{username}@{host} '{cron_command_str}'"
-    )
-    try:
-        output = subprocess.check_output(restore_command, shell=True, stderr=subprocess.STDOUT)
-        summary_message += f"\n成功恢复 {host} 上的 singbox 和 nezha 服务：\n{output.decode('utf-8')}"
-    except subprocess.CalledProcessError as e:
-        summary_message += f"\n无法恢复 {host} 上的 singbox 和 nezha 服务：\n{e.output.decode('utf-8')}"
+    for command in cron_commands:
+        restore_command = f"sshpass -p '{password}' ssh -o StrictHostKeyChecking=no -p {port} {username}@{host} '{command}'"
+        print(f"执行命令: {restore_command}")  # 添加日志
+        try:
+            output = subprocess.check_output(restore_command, shell=True, stderr=subprocess.STDOUT, timeout=60)
+            summary_message += f"\n成功恢复 {host} 上的 singbox和hy2和nezha 服务：\n{output.decode('utf-8')}"
+        except subprocess.CalledProcessError as e:
+            error_output = e.output.decode('utf-8')
+            print(f"执行命令失败: {restore_command}\n错误信息: {error_output}")  # 添加日志
+            summary_message += f"\n未能恢复 {host} 上的 singbox和hy2和nezha 服务：\n{error_output}"
+        except Exception as e:
+            error_message = str(e)
+            print(f"未知错误: {error_message}")  # 捕获其他异常
+            summary_message += f"\n未能恢复 {host} 上的 singbox和hy2和nezha 服务：\n{error_message}"
 
 # 发送汇总消息到 Telegram
 send_telegram_message(telegram_token, telegram_chat_id, summary_message)
