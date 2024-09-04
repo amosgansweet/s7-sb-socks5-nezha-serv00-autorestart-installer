@@ -2,6 +2,7 @@ import os
 import json
 import subprocess
 import requests
+import time
 
 def send_telegram_message(token, chat_id, message):
     if not token or not chat_id:
@@ -82,16 +83,23 @@ for server in servers:
         try:
             result = subprocess.run(restore_command, shell=True, capture_output=True, text=True, timeout=90)
             if result.returncode == 0:
-                summary_message += f"\n成功恢复 {host} 上的 singbox和hy2和nezha 服务：\n{result.stdout}"
+                # 等待5秒后检查进程是否成功启动
+                time.sleep(5)
+                verify_command = f"sshpass -p '{password}' ssh -o StrictHostKeyChecking=no -p {port} {username}@{host} 'ps aux | grep -v grep | grep {command.split()[0]}'"
+                verify_result = subprocess.run(verify_command, shell=True, capture_output=True, text=True)
+                if verify_result.returncode == 0:
+                    summary_message += f"\n成功恢复 {host} 上的服务：\n{verify_result.stdout}"
+                else:
+                    summary_message += f"\n后台进程可能未启动 {host} 上的服务。"
             else:
-                summary_message += f"\n未能恢复 {host} 上的 singbox和hy2和nezha 服务：\n{result.stderr}"
+                summary_message += f"\n未能恢复 {host} 上的服务：\n{result.stderr}"
         except subprocess.TimeoutExpired as e:
             print(f"命令执行超时: {restore_command}")  # 处理超时
-            summary_message += f"\n命令执行超时 {host} 上的 singbox和hy2和nezha 服务。"
+            summary_message += f"\n命令执行超时 {host} 上的服务。"
         except Exception as e:
             error_message = str(e)
             print(f"未知错误: {error_message}")  # 捕获其他异常
-            summary_message += f"\n未能恢复 {host} 上的 singbox和hy2和nezha 服务：\n{error_message}"
+            summary_message += f"\n未能恢复 {host} 上的服务：\n{error_message}"
 
 # 发送汇总消息到 Telegram
 send_telegram_message(telegram_token, telegram_chat_id, summary_message)
