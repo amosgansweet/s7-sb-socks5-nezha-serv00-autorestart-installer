@@ -80,12 +80,14 @@ for server in servers:
         restore_command = f"sshpass -p '{password}' ssh -o StrictHostKeyChecking=no -p {port} {username}@{host} '{command}'"
         print(f"执行命令: {restore_command}")  # 添加日志
         try:
-            output = subprocess.check_output(restore_command, shell=True, stderr=subprocess.STDOUT, timeout=90)
-            summary_message += f"\n成功恢复 {host} 上的 singbox和hy2和nezha 服务：\n{output.decode('utf-8')}"
-        except subprocess.CalledProcessError as e:
-            error_output = e.output.decode('utf-8')
-            print(f"执行命令失败: {restore_command}\n错误信息: {error_output}")  # 添加日志
-            summary_message += f"\n未能恢复 {host} 上的 singbox和hy2和nezha 服务：\n{error_output}"
+            result = subprocess.run(restore_command, shell=True, capture_output=True, text=True, timeout=90)
+            if result.returncode == 0:
+                summary_message += f"\n成功恢复 {host} 上的 singbox和hy2和nezha 服务：\n{result.stdout}"
+            else:
+                summary_message += f"\n未能恢复 {host} 上的 singbox和hy2和nezha 服务：\n{result.stderr}"
+        except subprocess.TimeoutExpired as e:
+            print(f"命令执行超时: {restore_command}")  # 处理超时
+            summary_message += f"\n命令执行超时 {host} 上的 singbox和hy2和nezha 服务。"
         except Exception as e:
             error_message = str(e)
             print(f"未知错误: {error_message}")  # 捕获其他异常
