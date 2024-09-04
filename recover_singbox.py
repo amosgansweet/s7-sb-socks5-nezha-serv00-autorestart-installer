@@ -81,7 +81,7 @@ for server in servers:
         restore_command = f"sshpass -p '{password}' ssh -o StrictHostKeyChecking=no -p {port} {username}@{host} '{command}'"
         print(f"执行命令: {restore_command}")  # 添加日志
         try:
-            result = subprocess.run(restore_command, shell=True, capture_output=True, text=True, timeout=130)
+            result = subprocess.run(restore_command, shell=True, capture_output=True, text=True, timeout=180)
             if result.returncode == 0:
                 # 等待5秒后检查进程是否成功启动
                 time.sleep(20)
