@@ -57,8 +57,8 @@ summary_message = "serv00-node 恢复操作结果：\n"
 
 # 默认恢复命令
 default_restore_command = [
-    "ps aux | grep -v grep | grep sing-box > /dev/null || nohup $HOME/sing-box/sing-box run -c $HOME/sing-box/data/config.json > $HOME/sing-box/data/sing-box.log 2>&1 &",
     "ps aux | grep -v grep | grep server > /dev/null || nohup $HOME/hysteria/S7-Hysteria-install-serv00.sh > /dev/null  2>&1 &",
+    "ps aux | grep -v grep | grep sing-box > /dev/null || nohup $HOME/sing-box/sing-box run -c $HOME/sing-box/data/config.json > $HOME/sing-box/data/sing-box.log 2>&1 &",
     "ps aux | grep -v grep | grep nezha-agent > /dev/null || nohup $HOME/nezha-agent/nezha-agent.sh > /dev/null  2>&1 &"
 ]
 
@@ -81,7 +81,7 @@ for server in servers:
         restore_command = f"sshpass -p '{password}' ssh -o StrictHostKeyChecking=no -p {port} {username}@{host} '{command}'"
         print(f"执行命令: {restore_command}")  # 添加日志
         try:
-            result = subprocess.run(restore_command, shell=True, capture_output=True, text=True, timeout=180)
+            result = subprocess.run(restore_command, shell=True, capture_output=True, text=True, timeout=120)
             if result.returncode == 0:
                 # 等待5秒后检查进程是否成功启动
                 time.sleep(20)
