@@ -2,7 +2,7 @@ name: 恢复singbox和hy2和nezha服务并发送Telegram消息
 
 on:
   schedule:
-    - cron: '0 4 */1 * *'  # 每1天4:00执行一次
+    - cron: '0 4 * * *'  # 每1天4:00执行一次
   workflow_dispatch:
 
 jobs:
