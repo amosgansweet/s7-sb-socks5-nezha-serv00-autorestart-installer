@@ -57,9 +57,9 @@ summary_message = "serv00-node 恢复操作结果：\n"
 
 # 默认恢复命令
 default_restore_command = [
-    "ps aux | grep -v grep | grep server > /dev/null || $HOME/hysteria/S7-Hysteria-install-serv00.sh > /dev/null  2>&1 &",
-    "ps aux | grep -v grep | grep sing-box > /dev/null || nohup $HOME/sing-box/sing-box run -c $HOME/sing-box/data/config.json > $HOME/sing-box/data/sing-box.log 2>&1 &",
-    "ps aux | grep -v grep | grep nezha-agent > /dev/null || nohup $HOME/nezha-agent/nezha-agent.sh > /dev/null  2>&1 &"
+    "ps aux | grep -v grep | grep server > /dev/null || $HOME/.s5/restartchecks5.sh > /dev/null  2>&1 &",
+    "ps aux | grep -v grep | grep sing-box > /dev/null || $HOME/sing-box/restartchecksb.sh > /dev/null 2>&1 &",
+    "ps aux | grep -v grep | grep nezha-agent > /dev/null || $HOME/nezha-agent/nezha-agent.sh > /dev/null  2>&1 &"
 ]
 
 # 遍历服务器列表并执行恢复操作
