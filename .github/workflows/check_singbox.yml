@@ -1,4 +1,4 @@
-name: 恢复singbox和hy2和nezha服务并发送Telegram消息
+name: 恢复singbox和socks5和nezha服务并发送Telegram消息
 
 on:
   schedule:
