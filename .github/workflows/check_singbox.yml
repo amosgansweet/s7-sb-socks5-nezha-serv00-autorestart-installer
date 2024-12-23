@@ -26,7 +26,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: 执行Python脚本恢复singbox和hy2和nezha并发送Telegram消息
+      - name: 执行Python脚本恢复singbox和socks5和nezha并发送Telegram消息
         env:
           ACCOUNTS_JSON: ${{ secrets.ACCOUNTS_JSON }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
