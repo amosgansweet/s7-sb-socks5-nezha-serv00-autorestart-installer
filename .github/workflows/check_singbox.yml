@@ -1,4 +1,4 @@
-name: 恢复singbox和socks5和nezha服务并发送Telegram消息
+name: 恢复BetadashN1-Amos-singbox和socks5服务并发送Telegram消息
 
 on:
   schedule:
