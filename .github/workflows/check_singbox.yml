@@ -2,7 +2,7 @@ name: 恢复BetadashN1-Amos-singbox和socks5服务并发送Telegram消息
 
 on:
   schedule:
-    - cron: '0 20 */10 * *'  # 北京时间每1天4:00执行一次（时差8小时）
+    - cron: '0 20 */10 * *'  # 北京时间每10天20:00执行一次（时差8小时）
   workflow_dispatch:
 
 jobs:
