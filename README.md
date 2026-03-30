@@ -1,5 +1,5 @@
 
-# keep alive for serv00
+# keep alive for serv00 by logging in(python3 recover_singbox.py) without restarting other apps on the system.
 
 # sing-box-installer
 
